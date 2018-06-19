@@ -14,7 +14,12 @@ var margin = {
 }
 
 var width = svgWidth - margin.left - margin.right;
+console.log("width = ", width);
 var height = svgHeight - margin.top - margin.bottom;
+console.log("height = ", height);
+
+console.log(".attr('y', 0 - margin.left) = ", 0-margin.left);
+console.log(".attr('x', 0 - (height/2)) = ", 0-(height/2));
 
 var svg = d3.select("#scatter")
     .append("svg")
@@ -27,7 +32,7 @@ var scatterGroup = svg.append("g")
 var chosenXAxis = "poverty";
 var chosenYAxis = "obesity";
 
-// add function to update x-scale upon click here
+// updates scale upon click
 function xScale(healthData, chosenXAxis) {
     var xLinearScale = d3.scaleLinear()
     .domain([d3.min(healthData, d => d[chosenXAxis]) *0.8, 
@@ -43,7 +48,7 @@ function yScale(healthData, chosenYAxis) {
 return yLinearScale;
 }
 
-// add function for updating xAxis upon click here
+// update axis upon click
 function renderXAxis(newXScale, xAxis) {
     var bottomAxis = d3.axisBottom(newXScale);
     xAxis.transition()
@@ -72,7 +77,6 @@ function renderCirclesY(circlesGroup, newYScale, chosenYAxis) {
     return circlesGroup;
 }
 
-// this works for x axis only
 function updateToolTipX(chosenXAxis, circlesGroup) {
     if (chosenXAxis === "poverty") {
         var xLabel = "Poverty:";
@@ -118,7 +122,7 @@ function updateToolTipY(chosenYAxis, circlesGroup) {
     .attr("class", "tooltip")
     .offset([80, -60])
     .html(function(d) {
-        return (`${yLabel} ${d[chosenYAxis]}`);
+        return (`${d.state}<br>${yLabel} ${d[chosenYAxis]}`);
     });
 
     circlesGroup.call(toolTipY);
@@ -148,10 +152,6 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
     });
 
     var xLinearScale = xScale(healthData, chosenXAxis);
-
-    // var yLinearScale = d3.scaleLinear()
-    //     .domain([0, d3.max(healthData, d => d.obesity)])
-    //     .range([height, 0]);
     var yLinearScale = yScale(healthData, chosenYAxis);
 
     var bottomAxis = d3.axisBottom(xLinearScale);
@@ -162,9 +162,7 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
         .attr("transform", `translate(0, ${height})`)
         .call(bottomAxis);
     
-    // append y axis
-    // scatterGroup.append("g")
-    //     .call(leftAxis)
+    // append y axis to graph
     var yAxis = scatterGroup.append("g")
         .call(leftAxis);
 
@@ -174,7 +172,6 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
         .enter()
         .append("circle")
         .attr("cx", d => xLinearScale(d[chosenXAxis]))
-        // .attr("cy", d => yLinearScale(d.obesity))
         .attr("cy", d => yLinearScale(d[chosenYAxis]))
         .attr("r", 10)
         .attr("fill", "blue")
@@ -204,50 +201,41 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
     .classed("inactive", true)
     .text("Household Income (Median)");
 
-    // scatterGroup.append("text")
-    //     .attr("transform", "rotate(-90)")
-    //     .attr("y", 0 - margin.left)
-    //     .attr("x", 0 - (height/2))
-    //     .attr("dy", "1em")
-    //     .classed("axis-text", true)
-    //     .text("Obese (%)");
-
     var yLabelsGroup = scatterGroup.append("g")
+        // assigning x and y attributes to yLabelsGroup isn't working, needed to assign to each label individually for it to work
+        // .attr("y", 0 - margin.left)
+        // .attr("x", 0 - (height/2))
         .attr("transform", "rotate(-90)")
-        // .attr("transform", `translate(${0 - margin.left}, ${0 - (height/2)})`);
-        // .attr("transform", `translate(${0 - (height/2)}), ${0 - margin.left}`);
-        // .attr("transform", `translate(${margin.left}, ${(height/2)})`);
+        // .attr("dy", "1em");
 
     var obesityLabel = yLabelsGroup.append("text")
-        .attr("x", -200)
+        // .attr("x", -200)
+        .attr("x", 0 - (height/2))
         .attr("y", -70)
         .attr("value", "obesity")
-        // .attr("dy", "1em")
-        // .classed("axis-text", true)
         .classed("active", true)
         .text("Obese (%)");
 
     var smokesLabel = yLabelsGroup.append("text")
-        .attr("x", -200)
+        // .attr("x", -200)
+        .attr("x", 0 - (height/2))
         .attr("y", -50)
         .attr("value", "smokes")
-        // .attr("dy", "1em")
         .classed("inactive", true)
         .text("Smokes (%)");
 
     var  healthcareLabel = yLabelsGroup.append("text")
-        .attr("x", -200)
+        // .attr("x", -200)
+        .attr("x", 0 - (height/2))
         .attr("y", -30)
         .attr("value", "healthcare")
-        // .attr("dy", "1em")
         .classed("inactive", true)
         .text("Lacks Healthcare (%)");
 
 
     
-
+    // Set what the initial ToolTip will display
     var circlesGroup = updateToolTipX(chosenXAxis, circlesGroup);
-    //  + updateToolTipY(chosenYAxis, circlesGroup);
     // var circlesGroup = updateToolTipY(chosenYAxis, circlesGroup);
 
     xLabelsGroup.selectAll("text")
