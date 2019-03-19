@@ -1,6 +1,4 @@
-/* Students:
- * =========
- * Add styling to your d3 chart with this file. */
+/* Add styling to d3 chart */
  .active {
     font-weight: bold;
     fill: #000;

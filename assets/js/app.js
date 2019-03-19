@@ -1,8 +1,5 @@
-// D3 Scatterplot Assignment
+// D3 Scatterplot
 
-// Students:
-// =========
-// Follow your written instructions and create a scatter plot with D3.js.
 var svgWidth = 960;
 var svgHeight = 500;
 
