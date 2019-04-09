@@ -78,10 +78,8 @@ function renderCirclesY(circlesGroup, newYScale, chosenYAxis) {
 // d3-tip.js
 // Update the tooltip with the correct label for which clickable label is selected
 // circlesGroup appends circles as the data points to the graph
-// this is where I will start trying to have only one updateToolTip function so that both axes' info is displayed in tooltip
-// function updateToolTipX(chosenXAxis, circlesGroup) {
     function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
-    // adding && to conditions (maybe)
+    // Look at chosenXAxis, assign label
     if (chosenXAxis === "poverty") {
         var xLabel = "Poverty:";
     }
@@ -92,7 +90,7 @@ function renderCirclesY(circlesGroup, newYScale, chosenYAxis) {
         var xLabel = "Income:";
     }
 
-    //added
+    // Look at chosenYAxis, assign label
     if (chosenYAxis === "obesity") {
         var yLabel = "Obesity:";
     }
@@ -103,64 +101,26 @@ function renderCirclesY(circlesGroup, newYScale, chosenYAxis) {
         var yLabel = "Lacks Healthcare:";
     }
 
-    // var toolTipX = d3.tip()
     var toolTip = d3.tip()
     .attr("class", "tooltip")
     // .offset([80, -60])
     // Place the tooltip directly above the point moused over
     .offset([-10, 5])
     .html(function(d) {
-        // return (`${d.state}<br>${xLabel} ${d[chosenXAxis]}`);
         return (`${d.state}<br>${xLabel} ${d[chosenXAxis]}<br>${yLabel} ${d[chosenYAxis]}`);
     });
 
-    // circlesGroup.call(toolTipX);
     circlesGroup.call(toolTip);
 
     circlesGroup.on("mouseover", function(data) {
-        // toolTipX.show(data);
         toolTip.show(data);
     })
         .on("mouseout", function(data) {
-            // toolTipX.hide(data);
             toolTip.hide(data);
         });
 
 return circlesGroup;
 }
-
-// function updateToolTipY(chosenYAxis, circlesGroup) {
-//     if (chosenYAxis === "obesity") {
-//         var yLabel = "Obesity:";
-//     }
-//     else if (chosenYAxis === "smokes") {
-//         var yLabel = "Smokes:"
-//     }
-//     else {
-//         var yLabel = "Lacks Healthcare:";
-//     }
-
-//     var toolTipY = d3.tip()
-//     .attr("class", "tooltip")
-//     // .offset([80, -60])
-//     // Place the tooltip directly above the point moused over
-//     .offset([-10, 5])
-//     .html(function(d) {
-//         return (`${d.state}<br>${yLabel} ${d[chosenYAxis]}`);
-//     });
-
-//     circlesGroup.call(toolTipY);
-
-//     circlesGroup.on("mouseover", function(data) {
-//         toolTipY.show(data);
-//     })
-//         .on("mouseout", function(data) {
-//             toolTipY.hide(data);
-//         });
-
-// return circlesGroup;
-// }
-
    
 // Retrieve data from CSV file
 d3.csv("assets/data/data.csv", function(err, healthData) {
@@ -264,9 +224,6 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
 
     
     // Set what the initial ToolTip will display
-    // var circlesGroup = updateToolTipX(chosenXAxis, circlesGroup);
-    // this line was commented out already:
-    // var circlesGroup = updateToolTipY(chosenYAxis, circlesGroup);
     var circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
     // Handle when an x label is selected
@@ -279,7 +236,6 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
                 xLinearScale = xScale(healthData, chosenXAxis);
                 xAxis = renderXAxis(xLinearScale, xAxis);
                 circlesGroup = renderCirclesX(circlesGroup, xLinearScale, chosenXAxis);
-                // circlesGroup = updateToolTipX(chosenXAxis, circlesGroup);
                 circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
                 if (chosenXAxis === "poverty") {
