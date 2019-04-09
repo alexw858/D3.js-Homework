@@ -26,6 +26,7 @@ var svg = d3.select("#scatter")
 var scatterGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+// default chosen axes are assigned
 var chosenXAxis = "poverty";
 var chosenYAxis = "obesity";
 
@@ -74,7 +75,11 @@ function renderCirclesY(circlesGroup, newYScale, chosenYAxis) {
     return circlesGroup;
 }
 
-function updateToolTipX(chosenXAxis, circlesGroup) {
+// d3-tip.js
+// Update the tooltip with the correct label for which clickable label is selected
+// circlesGroup appends circles as the data points to the graph
+    function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
+    // Look at chosenXAxis, assign label
     if (chosenXAxis === "poverty") {
         var xLabel = "Poverty:";
     }
@@ -85,26 +90,7 @@ function updateToolTipX(chosenXAxis, circlesGroup) {
         var xLabel = "Income:";
     }
 
-    var toolTipX = d3.tip()
-    .attr("class", "tooltip")
-    .offset([80, -60])
-    .html(function(d) {
-        return (`${d.state}<br>${xLabel} ${d[chosenXAxis]}`);
-    });
-
-    circlesGroup.call(toolTipX);
-
-    circlesGroup.on("mouseover", function(data) {
-        toolTipX.show(data);
-    })
-        .on("mouseout", function(data) {
-            toolTipX.hide(data);
-        });
-
-return circlesGroup;
-}
-
-function updateToolTipY(chosenYAxis, circlesGroup) {
+    // Look at chosenYAxis, assign label
     if (chosenYAxis === "obesity") {
         var yLabel = "Obesity:";
     }
@@ -115,25 +101,26 @@ function updateToolTipY(chosenYAxis, circlesGroup) {
         var yLabel = "Lacks Healthcare:";
     }
 
-    var toolTipY = d3.tip()
+    var toolTip = d3.tip()
     .attr("class", "tooltip")
-    .offset([80, -60])
+    // .offset([80, -60])
+    // Place the tooltip directly above the point moused over
+    .offset([-10, 5])
     .html(function(d) {
-        return (`${d.state}<br>${yLabel} ${d[chosenYAxis]}`);
+        return (`${d.state}<br>${xLabel} ${d[chosenXAxis]}<br>${yLabel} ${d[chosenYAxis]}`);
     });
 
-    circlesGroup.call(toolTipY);
+    circlesGroup.call(toolTip);
 
     circlesGroup.on("mouseover", function(data) {
-        toolTipY.show(data);
+        toolTip.show(data);
     })
         .on("mouseout", function(data) {
-            toolTipY.hide(data);
+            toolTip.hide(data);
         });
 
 return circlesGroup;
 }
-
    
 // Retrieve data from CSV file
 d3.csv("assets/data/data.csv", function(err, healthData) {
@@ -174,9 +161,11 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
         .attr("fill", "blue")
         .attr("opacity", ".3");
 
+    // Positions the x-axis labels just below the center of the x-axis
     var xLabelsGroup = scatterGroup.append("g")
         .attr("transform", `translate(${width/2}, ${height + 20})`);
 
+    // Adjusts the position of each clickable x-axis label and sets the text for each label
     var povertyLabel = xLabelsGroup.append("text")
         .attr("x", 0)
         .attr("y", 20)
@@ -198,6 +187,7 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
     .classed("inactive", true)
     .text("Household Income (Median)");
 
+    // Positions the clickable y-axis labels vertically and to the left of the y-axis
     var yLabelsGroup = scatterGroup.append("g")
         // assigning x and y attributes to yLabelsGroup isn't working, needed to assign to each label individually for it to work
         // .attr("y", 0 - margin.left)
@@ -205,11 +195,13 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
         .attr("transform", "rotate(-90)")
         // .attr("dy", "1em");
 
+    // Adjusts the position of each clickable y-axis label and sets the text for each label
     var obesityLabel = yLabelsGroup.append("text")
         // .attr("x", -200)
         .attr("x", 0 - (height/2))
         .attr("y", -70)
         .attr("value", "obesity")
+        // The default selected y-label is obesity
         .classed("active", true)
         .text("Obese (%)");
 
@@ -232,18 +224,19 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
 
     
     // Set what the initial ToolTip will display
-    var circlesGroup = updateToolTipX(chosenXAxis, circlesGroup);
-    // var circlesGroup = updateToolTipY(chosenYAxis, circlesGroup);
+    var circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
+    // Handle when an x label is selected
     xLabelsGroup.selectAll("text")
         .on("click", function() {
             var value = d3.select(this).attr("value");
+            // if a new x-axis is selected, set chosenXAxis to what is now selected
             if (value !==chosenXAxis) {
                 chosenXAxis = value;
                 xLinearScale = xScale(healthData, chosenXAxis);
                 xAxis = renderXAxis(xLinearScale, xAxis);
                 circlesGroup = renderCirclesX(circlesGroup, xLinearScale, chosenXAxis);
-                circlesGroup = updateToolTipX(chosenXAxis, circlesGroup);
+                circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
                 if (chosenXAxis === "poverty") {
                     povertyLabel
@@ -280,6 +273,7 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
                 }
             }
         });
+    // Handle when a y label is selected
     yLabelsGroup.selectAll("text")
         .on("click", function() {
             var value = d3.select(this).attr("value");
@@ -288,7 +282,8 @@ d3.csv("assets/data/data.csv", function(err, healthData) {
                 yLinearScale = yScale(healthData, chosenYAxis);
                 yAxis = renderYAxis(yLinearScale, yAxis);
                 circlesGroup = renderCirclesY(circlesGroup, yLinearScale, chosenYAxis);
-                circlesGroup = updateToolTipY(chosenYAxis, circlesGroup);
+                // circlesGroup = updateToolTipY(chosenYAxis, circlesGroup);
+                circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
                 if (chosenYAxis === "obesity") {
                     obesityLabel
