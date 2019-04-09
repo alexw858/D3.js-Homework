@@ -1,7 +1,19 @@
 // D3 Scatterplot
 
-var svgWidth = 960;
-var svgHeight = 500;
+// var svgWidth = 960;
+// var svgHeight = 500;
+
+// using the same dimensions of iframeContainer
+// var svgWidth = 720;
+// var svgHeight = 550.5;
+
+// Grab the width of the containing box
+var svgWidth = parseInt(d3.select("#scatter").style("width"));
+console.log("svgWidth=", svgWidth);
+// Doesn't work, returns 0
+// var svgHeight = parseInt(d3.select("#scatter").style("height"));
+var svgHeight = svgWidth - svgWidth / 3.9;
+console.log("svgHeight=",svgHeight);
 
 var margin = {
     top: 20,
